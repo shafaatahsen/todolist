@@ -1,0 +1,147 @@
+<html>
+  <head>
+    <title>My To Do List</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+  </head>
+  <body>
+    <div class = "container">
+      <div class = "row d-flex justify-content-center">
+        <div class= "list-group justify-content-center col-4" >
+
+          <a class="list-group-item active">
+            To Do List
+          </a>
+          <div id ="todo">
+            <a href="#" class="list-group-item list-group-item-action align-items-center" id ="0">
+              <input type="checkbox" value="option1">
+              <span >'Example item'<span>
+              <span class="badge badge-pill badge-danger" style="float:right">x</span>
+            </a>
+
+          </div>
+          
+
+          <input type="text" class = 'list-group-item' id = "newInput" placeholder="'Need to get milk'">
+
+          
+        </div>
+        
+      </div>
+      
+    </div>
+    
+    
+  </body>
+</html>
+
+
+
+
+<script>
+  let input = document.getElementById("newInput");
+  let todo = document.getElementById("todo");
+
+
+  //class for each item
+  class todoitem{
+    constructor(item,_id){
+      this.string = item; //string of actual todolist titem
+      this.complete = false; //default set item to incomplete/false
+      this.id = _id; //unique numeric ID for each item
+    }
+  }
+
+  let id = 0;
+
+  //Map storing all todolist items and their properties
+  //key: integer id, value: todoItem
+  let itemMap = new Map();
+
+  //function to add item to todo list
+  function add(){
+    let newitem = new todoitem(input.value, id);
+    itemMap.set(id, newitem);
+    id = id+1;
+    regen(); 
+    //Should i leave these here or in regen?
+    input.value="";
+  }
+
+  //Func to delete element from map
+  //Parameters:
+  //name: integer key of element in itemMap to be deleted
+  function dlt(_id){
+    itemMap.delete(_id);
+    regen();
+  }
+
+  //sets action to complete or incomplete
+  function complete(_id){
+    let temp = itemMap.get(_id);
+    temp.complete = !temp.complete;
+    itemMap.set(_id,temp);
+    regen();
+  }
+
+
+  //function to regenerate the todo list after list is updated, 
+  //uses elt() function to do this
+  //adds onclick functions with parameters from ItemMap
+  function regen(){
+    //clear DOM
+    todo.textContent = '';
+    //<input type="checkbox" value="option1">
+    for(let [_id, todoitem] of itemMap){
+      //string for id
+      let strid = _id.toString()
+      //create checkbox for done
+      let ch = elt("input",{type:"checkbox", onclick: "complete(" + strid + ")"})
+      ch.checked = todoitem.complete;
+
+      //create span for pill
+      let sp = elt("span", {class:"badge badge-pill badge-danger", style: "float: right", onclick: "dlt(" + strid + ")"});
+      sp.appendChild(document.createTextNode("X"));
+
+      //create text
+      let textsp = elt("span", {class:"ml-2"});
+      if (todoitem.complete){
+        textsp.setAttribute("style", "text-decoration: line-through;")
+      }
+      textsp.appendChild(document.createTextNode(todoitem.string));
+
+      //create element for todo
+      let a = elt("a", {class:"list-group-item list-group-item-action", id: strid}, ch, textsp, sp);
+      todo.appendChild(a);
+    }
+
+    //clear input
+    input.value = "";
+  }
+
+  //function to generate DOM items
+  //Parameters:
+  //name: string name of DOM element
+  //attrs: Map of desired attributes and their values
+  //...children: DOM elements to append to new node, in order
+  function elt(name, attrs, ...children) {
+    let dom = document.createElement(name);
+    for (let attr of Object.keys(attrs)) {
+      dom.setAttribute(attr, attrs[attr]);
+    }
+    for (let child of children) {
+      dom.appendChild(child);
+    }
+    return dom;
+  }
+
+  //Add 
+  window.addEventListener("keyup", event => {
+    if (event.key == "Enter") {
+      if(input.value != ""){
+        add();
+      }
+    }
+  });
+
+
+</script>
